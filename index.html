@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="vue.global.js"></script>
+        <style
+            type="text/css"
+        >
+            .negrito {
+                font-weight: bold;
+            }
+
+            .red_class {
+                color: red;
+            }
+
+            .green_class {
+                color: green;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Working With VueJS</h1>
+
+        <div id="app">
+            <h2 id="mensagemTitle">{{ message }}</h2>
+            <button @click="selectText">Select Text</button>
+            <hr>
+            <button @click="changeMessage">Change Message</button>
+            <hr>
+            <!-- <h3 class="negrito" :class="class_main">{{ name }}</h3> -->
+            <h3 :class="[class_main, 'negrito']">{{ name }}</h3>
+            <h3 :class="{ red_class: false, green_class: true }">{{ name }}</h3>
+            <h3 :class="1 == 2 ? 'red_class' : 'green_class'">{{ name }}</h3>
+            <hr>
+            <p>
+                Age: <span>{{ age }}</span>
+                <button @click="age++">+</button>
+                <button @click="age--">-</button>
+                <br>
+                <button @click="logged = !logged">Logged</button>
+                <span v-if="logged">Sim</span>
+                <span v-if="!logged">Não</span>
+                <input type="checkbox" v-model="logged" />
+                <!--<input type="checkbox" :checked="logged" @change="logged = !logged" />-->
+                <template v-if="logged">
+                    <br>
+                    <span><b>Gender : </b></span>
+                    <span v-if="gender == 'F'">Female</span>
+                    <span v-else-if="gender == 'M'">Male</span>
+                    <span v-else>Outro</span>
+                    <br>
+                    <span><b>Gender : </b></span>
+                    <span v-show="gender == 'F'">Female</span>
+                    <span v-show="gender == 'M'">Male</span>
+                    <br>
+                    <span>Hobbies</span>
+                    <ul>
+                        <li v-for="(hobby, index) in hobbies">
+                            {{ index }} - {{ hobby }}
+                        </li>
+                    </ul>
+                    <br>
+                    <span>Sports</span>
+                    <ul>
+                        <li v-for="sport in sports">
+                            {{ sport }}
+                        </li>
+                    </ul>
+                    <br>
+                    <span>Certificates</span>
+                    <ul>
+                        <li v-for="({name}, index) in certificates">
+                            {{ index }} - {{ name }}
+                        </li>
+                    </ul>
+                    <span>Certificates - Programming</span>
+                    <br>
+                    <span>Publications</span>
+                    <ul>
+                        <li v-for="(pub, index) in publications" :key="pub.id">
+                            Index : {{ index }} - Id : {{pub.id}} - Título : {{ pub.title }} - Category : {{ pub.category }}
+                            <br>
+                            <input type="text" v-model="pub.title" />
+                        </li>
+                    </ul>
+                    <br>
+                    <span>Publications Programming</span>
+                    <ul v-if="programmingPublications.length > 0">
+                        <li v-for="({title}, index) in programmingPublications">
+                            {{ index }} - {{ title }}
+                        </li>
+                    </ul>
+                    <button @click="publications.push({ title: 'Publication 4', content: 'Conteúdo 4', category: 'Finances' })">Add Publication</button>
+                    <button @click="publications.pop()">Delete Publication</button>
+                    <button @click="mixPublications">Mix Publications</button>
+                    <button @click="changePublication1">Modificar Publication - Índice 1</button>
+                    <br>
+                    <span>Numbers</span>
+                    <ul>
+                        <li v-for="(num, index) in 10">
+                            {{ index }} - {{ num }}
+                        </li>
+                    </ul>
+                    <br>
+                    <span>Array of Numbers</span>
+                    <ul>
+                        <li v-for="(num, index) in Array.from({ length: 10 }, (_, index) => index + 1)">
+                            {{ index }} - {{ num }}
+                        </li>
+                    </ul>
+                </template>
+                <p>
+                    City: {{ additional_informations.city }}
+                    <br>
+                    Country: {{ additional_informations.country }}
+                    <br>
+                    <!-- Salary: {{ grossSalary() }} -->
+                    Salary : <input type="text" v-model="additional_informations.salary" />
+                    <br>
+                    Gross Salary: {{ grossSalary() }}
+                    <br>
+                    Website : 
+                            <a 
+                                :style="additional_informations.website.style_link" 
+                                :href="additional_informations.website.url" 
+                                :target="additional_informations.website.target"
+                            >
+                                {{ additional_informations.website.title }}
+                            </a>
+                </p>
+            </p>
+            <hr>
+            <p v-html="html_content"></p>
+            <p v-text="html_content"></p>
+            <hr>
+            <input type="text" v-model="name" @keyup="upperName" />
+            <input type="button" value="Lower" @click="lowerName" />
+            <input type="button" value="Capitalize" @click="capitalize('Imprimir Texto')" />
+            <hr>
+            <input type="button" value="Clique" @click.once="clicks++" />
+            <p>Clicks: {{ clicks }}</p>
+            <br>
+            <span>Salary Initial : </span><span v-once>{{ additional_informations.salary }}</span>
+            <br>
+            <button @click="additional_informations.salary += 100">Aumentar Salary</button>
+            <br>
+            <span>Salary Updated : </span><span>{{ additional_informations.salary }}</span>
+        </div>
+        <hr>
+        <div class="application">
+            <h2>{{ message }}</h2>
+            <h3>{{ name }}</h3>
+        </div>
+
+        <script>
+            const app = Vue.createApp({
+                data() {
+                    return {
+                        message: 'Hello VueJS'
+                        , name: 'John Doe'
+                        , age: 25
+                        , logged: true
+                        , gender: 'M'
+                        , hobbies: ['Reading', 'Writing', 'Coding']
+                        , sports: {
+                            [Symbol.iterator]: function* () {
+                                yield 'Football';
+                                yield 'Basketball';
+                                yield 'Tennis';
+                            }
+                        }
+                        , certificates: {
+                            0: { name: 'Certificado 1', initial_date: '2021-01-01', conclusion_date: '2021-01-31' , category: 'Programming' }
+                            , 1: { name: 'Certificado 2', initial_date: '2021-02-01', conclusion_date: '2021-02-28' , category: 'Programming' }
+                            , 2: { name: 'Certificado 3', initial_date: '2021-03-01', conclusion_date: '2021-03-31' , category: 'Finances' }
+                        },
+                        publications: [
+                            { id: 1, title: 'Publication 1', content: 'Conteúdo 1' , category: 'Programming' }
+                            , { id: 2, title: 'Publication 2', content: 'Conteúdo 2' , category: 'Finances' }
+                            , { id: 3, title: 'Publication 3', content: 'Conteúdo 3' , category: 'Programming' }
+                        ]
+                        , additional_informations: {
+                            city: 'New York'
+                            , country: 'USA'
+                            , salary: 1000
+                            , discount_salary: 10
+                            , bonus_salary: 100
+                            , current_job: 'Developer'
+                            , company: 'Google'
+                            , website: {
+                                url: 'https://www.google.com'
+                                , title: 'Google'
+                                , target: '_blank'
+                                , style_link: {
+                                    color: 'red'
+                                }
+                            }
+                            , endereco: {
+                                rua: 'Rua 1'
+                                , numero: 123
+                            }
+                        }
+                        , html_content: '<b>HTML Content</b>'
+                        , class_main: 'red_class'
+                        , clicks: 0
+                    }
+                },
+                methods: {
+                    selectText() {
+                        console.log("Título da Mensagem : ");
+                        console.log(mensagemTitle.innerText);
+                        mensagemTitle.style.color = 'red';
+                    },
+                    changeMessage() {
+                        this.message = 'Hello World';
+                    },
+                    mixPublications() {
+                        this.publications = this.publications.sort(() => Math.random() - 0.5);
+                    },
+                    grossSalary() {
+                        return parseInt(this.additional_informations.salary) + parseInt(this.additional_informations.bonus_salary) - parseInt(this.additional_informations.discount_salary);
+                    },
+                    changePublication1() {
+                        // this.publications[1].title = 'Publication 2 Modificada';
+                        this.publications[1] = { id: 2, title: 'Publication 2 Modificada', content: 'Conteúdo 2 Modificado' };
+                    },
+                    upperName() {
+                        this.name = this.name.toUpperCase();
+                    }
+                    , lowerName() {
+                        this.name = this.name.toLowerCase();
+                    },
+                    capitalize(text, event) {
+                        if (event) {
+                            event.preventDefault();
+                        }
+                        alert(text);
+                    }
+                },
+                beforeCreate() {
+                    console.log('beforeCreate');
+                },
+                created() {
+                    console.log('created');
+                },
+                beforeMount() {
+                    console.log('beforeMount');
+                },
+                mounted() {
+                    console.log('mounted');
+                },
+                beforeUpdate() {
+                    console.log('beforeUpdate');
+                },
+                updated() {
+                    console.log('updated');
+                },
+                watch: {
+                    message(newValue, oldValue) {
+                        console.log('watch', newValue, oldValue);
+                    }
+                },
+                computed: {
+                    programmingPublications() {
+                        return this.publications.filter(pub => pub.category == 'Programming');
+                    }
+                }
+            });
+
+            const application = Vue.createApp({
+                data() {
+                    return {
+                        message: 'Class Component'
+                        , name: 'Class Name'
+                    }
+                }
+            });
+
+            app.mount('#app');
+            application.mount('.application');
+        </script>
+    </body>
+</html>
